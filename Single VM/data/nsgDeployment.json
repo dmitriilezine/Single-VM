@@ -16,7 +16,7 @@
     "sourceClientIP": { "type": "string" }
   },
   "variables": {
-    "feSubnetRange": "[parameters('subnets')[1].properties.addressPrefix]",
+    "feSubnetRange": "[parameters('subnets')[0].properties.addressPrefix]",
     "location": "[resourceGroup().location]"
   },
   "resources": [
