@@ -2,7 +2,7 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    
+
     "adminUsername": {
       "type": "string",
       "metadata": {
@@ -23,11 +23,33 @@
         "description": "Internet IP of the computer that will RDP into this lab. Change this to * to allow all Internet devices to brute force your lab or find out external IP or subnet for your device to lock down access to your lab from the Internet. Choice is yours."
       },
       "defaultValue": "127.0.0.1"
+    },
+    "VirtualMachineSize": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_A2",
+        "Standard_A1_v2",
+        "Standard_A2_v2",
+        "Standard_A2m_v2",
+        "Standard_A4_v2",
+        "Standard_A4m_v2",
+        "Standard_A8_v2",
+        "Standard_A8m_v2",
+        "Standard_D1_v2",
+        "Standard_D2_v2",
+        "Standard_D3_v2",
+        "Standard_D4_v2",
+        "Standard_D5_v2"
+      ],
+      "metadata": {
+        "description": "VM Size. The bigger it is, the more $ you will spend."
+      },
+      "defaultValue": "Standard_A2"
     }
   },
   "variables": {
     "assetLocation": "https://raw.githubusercontent.com/dmitriilezine/Single-VM/master/Single%20VM",
-    "VMSize": "Standard_A2",
+    "VMSize": "[parameters('VirtualMachineSize')]",
     "OSVersion": "2016-Datacenter",
     "virtualNetworkAddressRange": "10.0.0.0/16",
     "frontendNetworkSubnet": "10.0.2.0/24",
@@ -55,10 +77,10 @@
     "rdpNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
     "deployPublicIP": "DeployPublicIP",
     "deployPublicIPId": "[concat('Microsoft.Resources/deployments/', variables('deployPublicIP'))]",
-    "publicLBName": "[concat('ADPLB',resourceGroup().name)]",
+    "publicLBName": "[concat('PLB',resourceGroup().name)]",
     "publicIPAddressName": "[concat('ADlbPublicIP',resourceGroup().name)]",
-    "lbFE": "[concat('ADLBFE',resourceGroup().name)]",
-    "rpdNAT": "[concat('ADRDPNAT',resourceGroup().name)]",
+    "lbFE": "[concat('LBFE',resourceGroup().name)]",
+    "rpdNAT": "[concat('RDPNAT',resourceGroup().name)]",
     "rdpPort": "3389",
 
     "feNSGName": "[concat('FrontEndNSG',resourceGroup().name)]",
