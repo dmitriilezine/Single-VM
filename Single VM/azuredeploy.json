@@ -26,7 +26,7 @@
     }
   },
   "variables": {
-    "assetLocation": "https://raw.githubusercontent.com/dmitriilezine/Single VM/master/Single VM",
+    "assetLocation": "https://raw.githubusercontent.com/dmitriilezine/Single-VM/master/Single%20VM",
     "VMSize": "Standard_A2",
     "OSVersion": "2016-Datacenter",
     "virtualNetworkAddressRange": "10.0.0.0/16",
