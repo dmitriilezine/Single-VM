@@ -1,8 +1,192 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "parameters": {},
-  "variables": {},
-  "resources": [],
+  "parameters": {
+    
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Administrator of the new VMs and Domain"
+      },
+      "defaultValue": "labadmin"
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password for the Administrator account of the new VMs and Domain. If you do not change it, then it will look like this: Subscription#SUBSCRIPTIONID"
+      },
+      "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
+    },
+    "sourceClientIP": {
+      "type": "string",
+      "metadata": {
+        "description": "Internet IP of the computer that will RDP into this lab. Change this to * to allow all Internet devices to brute force your lab or find out external IP or subnet for your device to lock down access to your lab from the Internet. Choice is yours."
+      },
+      "defaultValue": "127.0.0.1"
+    }
+  },
+  "variables": {
+    "assetLocation": "https://raw.githubusercontent.com/dmitriilezine/Single VM/master/Single VM",
+    "VMSize": "Standard_A2",
+    "OSVersion": "2016-Datacenter",
+    "virtualNetworkAddressRange": "10.0.0.0/16",
+    "frontendNetworkSubnet": "10.0.2.0/24",
+    "primaryJumpServerIpAddress": "10.0.2.4",
+    "vnetTemplateURL": "[concat(variables('assetLocation'),'/data/vNetDeployment.json')]",
+    "nsgTemplateURL": "[concat(variables('assetLocation'),'/data/nsgDeployment.json')]",
+    "publicIPTemplateURL": "[concat(variables('assetLocation'),'/data/publicIP.json')]",
+    "jumpServerTemplateURL": "[concat(variables('assetLocation'),'/data/jumpServerVm.json')]",
+
+    "jumpVMName": "[substring(concat('JumpBox',resourceGroup().Name),0,7)]",
+
+    "deployVNet": "DeployVNet",
+    "deployVNetId": "[concat('Microsoft.Resources/deployments/', variables('deployVNet'))]",
+    "deployNSGs": "DeployNSGs",
+    "deployNSGsId": "[concat('Microsoft.Resources/deployments/', variables('deployNSGs'))]",
+    "jumpVmDeployment": "CreateJumpBoxVM",
+    "jumpVmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('jumpVmDeployment'))]",
+
+    "imageOffer": "WindowsServer",
+    "imagePublisher": "MicrosoftWindowsServer",
+
+    "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
+    "publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
+    "publiclbFEConfigID": "[concat(variables('publiclbID'),'/frontendIPConfigurations/',variables('lbFE'))]",
+    "rdpNATRuleID": "[concat(variables('publiclbID'),'/inboundNatRules/',variables('rpdNAT'))]",
+    "deployPublicIP": "DeployPublicIP",
+    "deployPublicIPId": "[concat('Microsoft.Resources/deployments/', variables('deployPublicIP'))]",
+    "publicLBName": "[concat('ADPLB',resourceGroup().name)]",
+    "publicIPAddressName": "[concat('ADlbPublicIP',resourceGroup().name)]",
+    "lbFE": "[concat('ADLBFE',resourceGroup().name)]",
+    "rpdNAT": "[concat('ADRDPNAT',resourceGroup().name)]",
+    "rdpPort": "3389",
+
+    "feNSGName": "[concat('FrontEndNSG',resourceGroup().name)]",
+    "feNSGID": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('feNSGName'))]",
+
+    "jumpNICName": "[concat('JumpBoxNic',resourceGroup().name)]",
+
+    "virtualNetworkName": "[concat('ADVNET',resourceGroup().name)]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+
+    "frontendSubnetName": "[concat('FrontEndSubnet',resourceGroup().name)]",
+    "frontendSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('frontendSubnetName'))]",
+
+    "subnets": [
+      {
+        "name": "[variables('frontendSubnetName')]",
+        "properties": {
+          "addressPrefix": "[variables('frontendNetworkSubnet')]",
+          "networkSecurityGroup": {
+            "id": "[variables('feNSGID')]"
+          }
+        }
+      }
+    ]
+  },
+  "resources": [
+    {
+      "name": "[variables('deployNSGs')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('nsgTemplateURL')]" },
+        "parameters": {
+          "virtualNetworkName": { "value": "[variables('virtualNetworkName')]" },
+          "subnets": { "value": "[ variables('subnets')]" },
+          "vNetID": { "value": "[variables('vnetID')]" },
+          "feNSGName": { "value": "[variables('feNSGName')]" },
+          "feSubnetName": { "value": "[variables('frontendSubnetName')]" },
+          "feSubnetId": { "value": "[variables('frontendSubnetID')]" },
+          "sourceClientIP": { "value": "[parameters('sourceClientIP')]" }
+        }
+      }
+    },
+    {
+      "name": "[variables('deployVNet')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[variables('deployNSGsId')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('vnetTemplateURL')]" },
+        "parameters": {
+          "virtualNetworkName": { "value": "[variables('virtualNetworkName')]" },
+          "subnets": { "value": "[ variables('subnets') ]" },
+          "virtualNetworkAddressRange": { "value": "[variables('virtualNetworkAddressRange')]" }
+        }
+      }
+    },
+    {
+      "name": "[variables('deployPublicIP')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[variables('deployVNetId')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('publicIPTemplateURL')]" },
+        "parameters": {
+          "virtualNetworkName": { "value": "[variables('virtualNetworkName')]" },
+          "subnets": { "value": "[ variables('subnets') ]" },
+          "virtualNetworkAddressRange": { "value": "[variables('virtualNetworkAddressRange')]" },
+          "publicIPAddressName": { "value": "[variables('publicIPAddressName')]" },
+          "dnsPrefix": { "value": "[variables('dnsPrefix')]" },
+          "publicLBName": { "value": "[variables('publicLBName')]" },
+          "lbFE": { "value": "[variables('lbFE')]" },
+          "rpdNAT": { "value": "[variables('rpdNAT')]" },
+          "rdpPort": { "value": "[variables('rdpPort')]" }
+        }
+      }
+    },
+    {
+      "name": "[variables('jumpVmDeployment')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[variables('deployPublicIPId')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('jumpServerTemplateURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "subnetResourceID": {
+            "value": "[variables('frontendSubnetID')]"
+          },
+          "windowsImageSKU": {
+            "value": "[variables('OSVersion')]"
+          },
+          "vmName": {
+            "value": "[variables('jumpVMName')]"
+          },
+          "vmSize": {
+            "value": "[variables('VMSize')]"
+          },
+          "jumpNicName": {
+            "value": "[variables('jumpNICName')]"
+          },
+          "primaryIpAddress": {
+            "value": "[variables('primaryJumpServerIpAddress')]"
+          },
+          "adRDPNATRuleID": {
+            "value": "[variables('rdpNATRuleID')]"
+          }
+        }
+      }
+    }
+  ],
   "outputs": {}
 }

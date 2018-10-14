@@ -1,0 +1,52 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the virtual network for this deployment"
+      }
+    },
+    "subnets": { "type": "array" },
+    "vNetID": { "type": "string" },
+    "feNSGName": { "type": "string" },
+    "feSubnetName": { "type": "string" },
+    "feSubnetId": { "type": "string" },
+    "sourceClientIP": { "type": "string" }
+  },
+  "variables": {
+    "feSubnetRange": "[parameters('subnets')[1].properties.addressPrefix]",
+    "location": "[resourceGroup().location]"
+  },
+  "resources": [
+
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[parameters('feNSGName')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "FrontEndNSG"
+      },
+      "properties": {
+        "securityRules": [
+          {
+            "name": "allow_RDP_from_PhysicalDeviceIP",
+            "properties": {
+              "description": "Allow communication from Internet to Front End",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3389",
+              "sourceAddressPrefix": "[parameters('sourceClientIP')]",
+              "destinationAddressPrefix": "[variables('feSubnetRange')]",
+              "access": "Allow",
+              "priority": 103,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
