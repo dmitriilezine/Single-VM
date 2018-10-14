@@ -69,6 +69,8 @@
     "virtualNetworkName": "[concat('ADVNET',resourceGroup().name)]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
 
+    "dnsPrefix": "[tolower(concat(resourceGroup().name,'jump'))]",
+
     "frontendSubnetName": "[concat('FrontEndSubnet',resourceGroup().name)]",
     "frontendSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('frontendSubnetName'))]",
 
