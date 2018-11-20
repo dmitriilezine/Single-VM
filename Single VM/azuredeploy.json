@@ -24,6 +24,17 @@
       },
       "defaultValue": "127.0.0.1"
     },
+    "WindowsOSType": {
+      "type": "string",
+      "defaultValue": "Win10Pro1809",
+      "allowedValues": [
+        "Win10Pro1809",
+        "WinServer2016"
+      ],
+      "metadata": {
+        "description": "Select the OS to deploy"
+      }
+    },
     "VirtualMachineSize": {
       "type": "string",
       "allowedValues": [
@@ -51,7 +62,15 @@
   "variables": {
     "assetLocation": "https://raw.githubusercontent.com/dmitriilezine/Single-VM/master/Single%20VM",
     "VMSize": "[parameters('VirtualMachineSize')]",
-    "OSVersion": "2016-Datacenter",
+    "ServerOSVersion": "2016-Datacenter",
+    "ServerImageOffer": "WindowsServer",
+    "ServerImagePublisher": "MicrosoftWindowsServer",
+    "clientOSVersion": "rs5-pro",
+    "clientImageOffer": "Windows-10",
+    "clientImagePublisher": "MicrosoftWindowsDesktop",
+    "serverLicenseType": "Windows_Server",
+    "clientLicenseType": "Windows_Client",
+
     "virtualNetworkAddressRange": "10.0.0.0/16",
     "frontendNetworkSubnet": "10.0.2.0/24",
     "primaryJumpServerIpAddress": "10.0.2.4",
@@ -169,6 +188,7 @@
       }
     },
     {
+      "condition": "[equals(parameters('WindowsOSType'),'WinServer2016')]",
       "name": "[variables('jumpVmDeployment')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
@@ -192,7 +212,70 @@
             "value": "[variables('frontendSubnetID')]"
           },
           "windowsImageSKU": {
-            "value": "[variables('OSVersion')]"
+            "value": "[variables('ServerOSVersion')]"
+          },
+          "windowsImagePublisher": {
+            "value": "[variables('ServerImagePublisher')]"
+          },
+          "windowsImageOffer": {
+            "value": "[variables('ServerImageOffer')]"
+          },
+          "windowsLicenseType": {
+            "value": "[variables('serverLicenseType')]"
+          },
+          "vmName": {
+            "value": "[variables('jumpVMName')]"
+          },
+          "vmSize": {
+            "value": "[variables('VMSize')]"
+          },
+          "jumpNicName": {
+            "value": "[variables('jumpNICName')]"
+          },
+          "primaryIpAddress": {
+            "value": "[variables('primaryJumpServerIpAddress')]"
+          },
+          "adRDPNATRuleID": {
+            "value": "[variables('rdpNATRuleID')]"
+          }
+        }
+      }
+    },
+    {
+      "condition": "[equals(parameters('WindowsOSType'),'Win10Pro1809')]",
+      "name": "[variables('jumpVmDeployment')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[variables('deployPublicIPId')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('jumpServerTemplateURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "subnetResourceID": {
+            "value": "[variables('frontendSubnetID')]"
+          },
+          "windowsImageSKU": {
+            "value": "[variables('clientOSVersion')]"
+          },
+          "windowsImagePublisher": {
+            "value": "[variables('clientImagePublisher')]"
+          },
+          "windowsImageOffer": {
+            "value": "[variables('clientImageOffer')]"
+          },
+          "windowsLicenseType": {
+            "value": "[variables('clientLicenseType')]"
           },
           "vmName": {
             "value": "[variables('jumpVMName')]"
