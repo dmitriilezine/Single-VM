@@ -85,11 +85,11 @@
     "deployVNetId": "[concat('Microsoft.Resources/deployments/', variables('deployVNet'))]",
     "deployNSGs": "DeployNSGs",
     "deployNSGsId": "[concat('Microsoft.Resources/deployments/', variables('deployNSGs'))]",
-    "jumpVmDeployment": "CreateJumpBoxVM",
-    "jumpVmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('jumpVmDeployment'))]",
+    "serverVmDeployment": "CreateServerVM",
+    "serverVmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('serverVmDeployment'))]",
+    "clientVmDeployment": "CreateClientVM",
+    "clientVmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('clientVmDeployment'))]",
 
-    "imageOffer": "WindowsServer",
-    "imagePublisher": "MicrosoftWindowsServer",
 
     "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
     "publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
@@ -189,7 +189,7 @@
     },
     {
       "condition": "[equals(parameters('WindowsOSType'),'WinServer2016')]",
-      "name": "[variables('jumpVmDeployment')]",
+      "name": "[variables('serverVmDeployment')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
@@ -243,7 +243,7 @@
     },
     {
       "condition": "[equals(parameters('WindowsOSType'),'Win10Pro1809')]",
-      "name": "[variables('jumpVmDeployment')]",
+      "name": "[variables('clientVmDeployment')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
