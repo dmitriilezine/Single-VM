@@ -29,6 +29,7 @@
       "defaultValue": "Win10Pro1809",
       "allowedValues": [
         "Win10Pro1809",
+        "Win10WithVSC2019",
         "Win10WithVSC2017",
         "WinServer2016"
       ],
@@ -71,6 +72,9 @@
     "clientImagePublisher": "MicrosoftWindowsDesktop",
     "serverLicenseType": "Windows_Server",
     "clientLicenseType": "Windows_Client",
+    "vsc2019OSVersion": "vs-2019-comm-latest-win10-n",
+    "vsc2019ImageOffer": "visualstudio2019latest",
+    "vsc2019ImagePublisher": "microsoftvisualstudio",
     "vsc2017OSVersion": "VS-2017-Comm-Win10-N",
     "vsc2017ImageOffer": "VisualStudio",
     "vsc2017ImagePublisher": "MicrosoftVisualStudio",
@@ -85,6 +89,7 @@
     "jumpServerTemplateURL": "[concat(variables('assetLocation'),'/data/jumpServerVm.json')]",
 
     "jumpVMName": "[substring(concat('JumpBox',resourceGroup().Name),0,7)]",
+    "vsc2019VMName": "[substring(concat('VSC2019',resourceGroup().Name),0,7)]",
     "vsc2017VMName": "[substring(concat('VSC2017',resourceGroup().Name),0,7)]",
 
     "deployVNet": "DeployVNet",
@@ -95,6 +100,8 @@
     "serverVmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('serverVmDeployment'))]",
     "clientVmDeployment": "CreateClientVM",
     "clientVmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('clientVmDeployment'))]",
+    "vsc2019VmDeployment": "CreateVSC2019VM",
+    "vsc2019VmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('vsc2019VmDeployment'))]",
     "vsc2017VmDeployment": "CreateVSC2017VM",
     "vsc2017VmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('vsc2017VmDeployment'))]",
 
@@ -286,6 +293,60 @@
           },
           "vmName": {
             "value": "[variables('jumpVMName')]"
+          },
+          "vmSize": {
+            "value": "[variables('VMSize')]"
+          },
+          "jumpNicName": {
+            "value": "[variables('jumpNICName')]"
+          },
+          "primaryIpAddress": {
+            "value": "[variables('primaryJumpServerIpAddress')]"
+          },
+          "adRDPNATRuleID": {
+            "value": "[variables('rdpNATRuleID')]"
+          }
+        }
+      }
+    },
+    {
+      "condition": "[equals(parameters('WindowsOSType'),'Win10WithVSC2019')]",
+      "name": "[variables('vsc2019VmDeployment')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[variables('deployPublicIPId')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('jumpServerTemplateURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "subnetResourceID": {
+            "value": "[variables('frontendSubnetID')]"
+          },
+          "windowsImageSKU": {
+            "value": "[variables('vsc2019OSVersion')]"
+          },
+          "windowsImagePublisher": {
+            "value": "[variables('vsc2019ImagePublisher')]"
+          },
+          "windowsImageOffer": {
+            "value": "[variables('vsc2019ImageOffer')]"
+          },
+          "windowsLicenseType": {
+            "value": "[variables('clientLicenseType')]"
+          },
+          "vmName": {
+            "value": "[variables('vsc2019VMName')]"
           },
           "vmSize": {
             "value": "[variables('VMSize')]"
