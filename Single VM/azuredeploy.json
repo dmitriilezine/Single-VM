@@ -29,6 +29,7 @@
       "defaultValue": "Win10Pro1809",
       "allowedValues": [
         "Win10Pro1809",
+        "Win10WithVSC2019",
         "Win10WithVSC2017",
         "WinServer2016"
       ],
@@ -71,6 +72,9 @@
     "clientImagePublisher": "MicrosoftWindowsDesktop",
     "serverLicenseType": "Windows_Server",
     "clientLicenseType": "Windows_Client",
+    "vsc2019OSVersion": "vs-2019-comm-latest-win10-n",
+    "vsc2019ImageOffer": "visualstudio2019latest",
+    "vsc2019ImagePublisher": "microsoftvisualstudio",
     "vsc2017OSVersion": "VS-2017-Comm-Win10-N",
     "vsc2017ImageOffer": "VisualStudio",
     "vsc2017ImagePublisher": "MicrosoftVisualStudio",
@@ -286,6 +290,60 @@
           },
           "vmName": {
             "value": "[variables('jumpVMName')]"
+          },
+          "vmSize": {
+            "value": "[variables('VMSize')]"
+          },
+          "jumpNicName": {
+            "value": "[variables('jumpNICName')]"
+          },
+          "primaryIpAddress": {
+            "value": "[variables('primaryJumpServerIpAddress')]"
+          },
+          "adRDPNATRuleID": {
+            "value": "[variables('rdpNATRuleID')]"
+          }
+        }
+      }
+    },
+    {
+      "condition": "[equals(parameters('WindowsOSType'),'Win10WithVSC2019')]",
+      "name": "[variables('vsc2017VmDeployment')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[variables('deployPublicIPId')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('jumpServerTemplateURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "subnetResourceID": {
+            "value": "[variables('frontendSubnetID')]"
+          },
+          "windowsImageSKU": {
+            "value": "[variables('vsc2019OSVersion')]"
+          },
+          "windowsImagePublisher": {
+            "value": "[variables('vsc2019ImagePublisher')]"
+          },
+          "windowsImageOffer": {
+            "value": "[variables('vsc2019ImageOffer')]"
+          },
+          "windowsLicenseType": {
+            "value": "[variables('clientLicenseType')]"
+          },
+          "vmName": {
+            "value": "[variables('vsc2019VMName')]"
           },
           "vmSize": {
             "value": "[variables('VMSize')]"
