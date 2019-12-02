@@ -29,6 +29,7 @@
       "defaultValue": "Win10Pro1809",
       "allowedValues": [
         "Win10Pro1809",
+        "Win10WithVSC2019",
         "Win10WithVSC2017",
         "WinServer2016"
       ],
