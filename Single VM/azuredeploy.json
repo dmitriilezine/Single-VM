@@ -66,8 +66,8 @@
     "vsc2017OSVersion": "VS-2017-Comm-Win10-N",
     "vsc2017ImageOffer": "VisualStudio",
     "vsc2017ImagePublisher": "MicrosoftVisualStudio",
-    "vsc2019OSVersion": "VS-2017-Comm-Win10-N",
-    "vsc2019ImageOffer": "VisualStudio",
+    "vsc2019OSVersion": "vs-2019-comm-latest-win10-n",
+    "vsc2019ImageOffer": "visualstudio2019latest",
     "vsc2019ImagePublisher": "MicrosoftVisualStudio",
 
     "virtualNetworkAddressRange": "10.0.0.0/16",
