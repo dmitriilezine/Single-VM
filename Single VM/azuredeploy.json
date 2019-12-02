@@ -87,6 +87,7 @@
 
     "jumpVMName": "[substring(concat('JumpBox',resourceGroup().Name),0,7)]",
     "vsc2017VMName": "[substring(concat('VSC2017',resourceGroup().Name),0,7)]",
+    "vsc2019VMName": "[substring(concat('VSC2019',resourceGroup().Name),0,7)]",
 
     "deployVNet": "DeployVNet",
     "deployVNetId": "[concat('Microsoft.Resources/deployments/', variables('deployVNet'))]",
@@ -98,6 +99,8 @@
     "clientVmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('clientVmDeployment'))]",
     "vsc2017VmDeployment": "CreateVSC2017VM",
     "vsc2017VmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('vsc2017VmDeployment'))]",
+    "vsc2019VmDeployment": "CreateVSC2019VM",
+    "vsc2019VmDeploymentId": "[concat('Microsoft.Resources/deployments/', variables('vsc2019VmDeployment'))]",
 
     "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
     "publiclbID": "[resourceId('Microsoft.Network/loadBalancers',variables('publicLBName'))]",
